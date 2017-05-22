@@ -11,9 +11,12 @@ import world.World;
  */
 public class RandomGuessPlayer implements Player{
 
+    private world;
+
     @Override
     public void initialisePlayer(World world) {
         // To be implemented.
+        this.world = world;
     } // end of initialisePlayer()
 
     @Override
@@ -27,10 +30,30 @@ public class RandomGuessPlayer implements Player{
 
     @Override
     public Guess makeGuess() {
-        // To be implemented.
+        int guessRow;
+        int guessColumn;
+        boolean foundGuess;
 
-        // dummy return
-        return null;
+        // Keep making guesses until we find one that hasn't already been made
+        while(!foundGuess) {
+            foundGuess = true;
+
+            guessRow = (int)(Math.random() * world.numRow);
+            guessColumn = (int)(Math.random() * world.numColumn);
+
+            // Search for random coordinates in shots already taken
+            for (c : world.shots) {
+                if (c.row == guessRow && c.column == guessColumn) {
+                    foundGuess = false;
+                    break;
+                }
+            }
+        }
+
+        Guess guess = new Guess();
+        guess.row = guessRow;
+        guess.column = guessColumn;
+        return guess;
     } // end of makeGuess()
 
 
