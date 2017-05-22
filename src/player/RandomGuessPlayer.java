@@ -1,6 +1,7 @@
 package player;
 
 import java.util.Scanner;
+import java.lang.Math;
 import world.World;
 
 /**
@@ -21,10 +22,24 @@ public class RandomGuessPlayer implements Player{
 
     @Override
     public Answer getAnswer(Guess guess) {
-        // To be implemented.
+        Answer answer = new Answer();
 
-        // dummy return
-        return null;
+        // Loop over each ship
+        for (sl : world.shipLocations) {
+            // Loop over each coordinate the ship occupies
+            for (c : sl.coordinates) {
+                // Check if the guess matches the coordinate
+                if (guess.row == c.row && guess.column == c.column) {
+                    answer.isHit = true;
+                    if (/* TODO: check if ship has been sunk */) {
+                        answer.shipSunk = sl.ship;
+                    }
+                    return answer;
+                }
+            }
+        }
+
+        return answer;
     } // end of getAnswer()
 
 
