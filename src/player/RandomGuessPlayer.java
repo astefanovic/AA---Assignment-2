@@ -2,6 +2,7 @@ package player;
 
 import java.util.Scanner;
 import java.lang.Math;
+import java.util.ArrayList;
 import world.World;
 
 /**
@@ -13,7 +14,7 @@ import world.World;
 public class RandomGuessPlayer implements Player{
 
     private World world;
-    private ArrayList<Guess> unmadeGuesses = new ArrayList<Guess>;
+    private ArrayList<Guess> unmadeGuesses = new ArrayList<Guess>();
 
     @Override
     public void initialisePlayer(World world) {
@@ -23,7 +24,7 @@ public class RandomGuessPlayer implements Player{
         // Initialise unmade guesses
         for (int i = 0; i < world.numRow; i++) {
             for (int j = 0; j < world.numColumn; j++) {
-                Guess g = new guess()
+                Guess g = new Guess();
                 g.row = i;
                 g.column = j;
                 unmadeGuesses.add(g);
@@ -36,13 +37,13 @@ public class RandomGuessPlayer implements Player{
         Answer answer = new Answer();
 
         // Loop over each ship
-        for (sl : world.shipLocations) {
+        for (World.ShipLocation sl : world.shipLocations) {
             // Loop over each coordinate the ship occupies
-            for (c : sl.coordinates) {
+            for (World.Coordinate c : sl.coordinates) {
                 // Check if the guess matches the coordinate
                 if (guess.row == c.row && guess.column == c.column) {
                     answer.isHit = true;
-                    if (isShipSunk(sl)) answer.shipSunk = sl.ship
+                    if (isShipSunk(sl)) answer.shipSunk = sl.ship;
                     return answer;
                 }
             }
@@ -75,9 +76,9 @@ public class RandomGuessPlayer implements Player{
     } // end of noRemainingShips()
 
     // Check if the ship has been sunk
-    private boolean isShipSunk(ShipLocation sl) {
+    private boolean isShipSunk(World.ShipLocation sl) {
         // Loop over all of the ship's coordinates
-        for (c : sl.coordinates) {
+        for (World.Coordinate c : sl.coordinates) {
             // Check if coordinate has been hit already
             if (!world.shots.contains(c)) {
                 return false;
