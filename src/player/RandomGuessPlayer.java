@@ -42,9 +42,20 @@ public class RandomGuessPlayer implements Player{
                 // Check if the guess matches the coordinate
                 if (guess.row == c.row && guess.column == c.column) {
                     answer.isHit = true;
-                    if (/* TODO: check if ship has been sunk */) {
-                        answer.shipSunk = sl.ship;
+
+                    // Assume ship has been sunk, then check
+                    answer.shipSunk = sl.ship;
+
+                    // Loop over all of the ship's coordinates
+                    for (c2 : sl.coordinates) {
+                        // Check if coordinate has been hit already
+                        if (!world.shots.contains(c2)) {
+                            answer.shipSunk = null;
+                            break;
+                        }
                     }
+
+                    // If guess was a hit, we can return here
                     return answer;
                 }
             }
