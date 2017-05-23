@@ -12,12 +12,23 @@ import world.World;
  */
 public class RandomGuessPlayer implements Player{
 
-    private world;
+    private World world;
+    private ArrayList<Guess> unmadeGuesses = new ArrayList<Guess>;
 
     @Override
     public void initialisePlayer(World world) {
         // To be implemented.
         this.world = world;
+
+        // Initialise unmade guesses
+        for (int i = 0; i < world.numRow; i++) {
+            for (int j = 0; j < world.numColumn; j++) {
+                Guess g = new guess()
+                g.row = i;
+                g.column = j;
+                unmadeGuesses.add(g);
+            }
+        }
     } // end of initialisePlayer()
 
     @Override
@@ -45,30 +56,10 @@ public class RandomGuessPlayer implements Player{
 
     @Override
     public Guess makeGuess() {
-        int guessRow;
-        int guessColumn;
-        boolean foundGuess;
-
-        // Keep making guesses until we find one that hasn't already been made
-        while(!foundGuess) {
-            foundGuess = true;
-
-            guessRow = (int)(Math.random() * world.numRow);
-            guessColumn = (int)(Math.random() * world.numColumn);
-
-            // Search for random coordinates in shots already taken
-            for (c : world.shots) {
-                if (c.row == guessRow && c.column == guessColumn) {
-                    foundGuess = false;
-                    break;
-                }
-            }
-        }
-
-        Guess guess = new Guess();
-        guess.row = guessRow;
-        guess.column = guessColumn;
-        return guess;
+        // Generate random number
+        int randIndex = (int)(Math.random() * (unmadeGuesses.size() - 1));
+        // Remove that index from the unmade guesses and return it
+        return unmadeGuesses.remove(randIndex);
     } // end of makeGuess()
 
 
