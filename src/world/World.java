@@ -23,6 +23,17 @@ public class World {
     public class Coordinate {
         public int row;
         public int column;
+
+        @Override
+        public boolean equals(Object object) {
+            boolean isSame = false;
+            if (object != null && object instanceof Coordinate) {
+                Coordinate other = (Coordinate) object;
+                isSame = (this.row == other.row && this.column == other.column);
+            }
+
+            return isSame;
+        } 
     }
 
     // nested class for storing ship locations.
@@ -241,8 +252,8 @@ public class World {
         int offset = player - 1;
 
         int d = offset * (numColumn + 1);
-            StdDraw.setPenColor(StdDraw.RED);
-            StdDraw.setPenRadius(0.01);
+        StdDraw.setPenColor(StdDraw.RED);
+        StdDraw.setPenRadius(0.01);
         if (isHex) {
             int r = guess.row;
             double c = guess.column - (r + 1) / 2 + r % 2 * 0.5;;
