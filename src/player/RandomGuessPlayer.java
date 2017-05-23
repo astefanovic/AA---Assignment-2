@@ -42,20 +42,7 @@ public class RandomGuessPlayer implements Player{
                 // Check if the guess matches the coordinate
                 if (guess.row == c.row && guess.column == c.column) {
                     answer.isHit = true;
-
-                    // Assume ship has been sunk, then check
-                    answer.shipSunk = sl.ship;
-
-                    // Loop over all of the ship's coordinates
-                    for (c2 : sl.coordinates) {
-                        // Check if coordinate has been hit already
-                        if (!world.shots.contains(c2)) {
-                            answer.shipSunk = null;
-                            break;
-                        }
-                    }
-
-                    // If guess was a hit, we can return here
+                    if (isShipSunk(sl)) answer.shipSunk = sl.ship
                     return answer;
                 }
             }
@@ -63,7 +50,6 @@ public class RandomGuessPlayer implements Player{
 
         return answer;
     } // end of getAnswer()
-
 
     @Override
     public Guess makeGuess() {
@@ -87,5 +73,17 @@ public class RandomGuessPlayer implements Player{
         // dummy return
         return true;
     } // end of noRemainingShips()
+
+    // Check if the ship has been sunk
+    private boolean isShipSunk(ShipLocation sl) {
+        // Loop over all of the ship's coordinates
+        for (c : sl.coordinates) {
+            // Check if coordinate has been hit already
+            if (!world.shots.contains(c)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
 } // end of class RandomGuessPlayer
