@@ -9,19 +9,49 @@ import world.World;
  *
  * @author Youhan, Jeffrey
  */
-public class GreedyGuessPlayer  implements Player{
+public class GreedyGuessPlayer implements Player{
 
     @Override
     public void initialisePlayer(World world) {
-        // To be implemented.
-    } // end of initialisePlayer()
+        this.world = world;
+
+        // Initialise unmade guesses
+        for (int i = 0; i < world.numRow; i++) {
+            for (int j = 0; j < world.numColumn; j++) {
+                Guess g = new Guess();
+                g.row = i;
+                g.column = j;
+                unmadeGuesses.add(g);
+            }
+        }
+    }
 
     @Override
     public Answer getAnswer(Guess guess) {
-        // To be implemented.
+        Answer answer = new Answer();
 
-        // dummy return
-        return null;
+        // Loop over each ship
+        for (World.ShipLocation sl : world.shipLocations) {
+            // Loop over each coordinate the ship occupies
+            for (World.Coordinate c : sl.coordinates) {
+                // Check if the guess matches the coordinate
+                if (guess.row == c.row && guess.column == c.column) {
+                    answer.isHit = true;
+                    if (isShipSunk(sl))
+                    {
+                        answer.shipSunk = sl.ship;
+                        for(int i = 0; i < world.shipLocations.size(); i++)
+                        {
+                            if(world.shipLocations.get(i).ship.name().equals(answer.shipSunk.name()))
+                                world.shipLocations.remove(i);
+                        }
+                    }
+                    return answer;
+                }
+            }
+        }
+
+        return answer;
     } // end of getAnswer()
 
 
