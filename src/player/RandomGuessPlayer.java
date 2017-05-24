@@ -1,8 +1,9 @@
 package player;
 
 import java.util.Scanner;
+import java.lang.Math;
+import java.util.ArrayList;
 import world.World;
-
 /**
  * Random guess player (task A).
  * Please implement this class.
@@ -11,26 +12,59 @@ import world.World;
  */
 public class RandomGuessPlayer implements Player{
 
+    private World world;
+    private ArrayList<Guess> unmadeGuesses = new ArrayList<Guess>();
+
     @Override
     public void initialisePlayer(World world) {
         // To be implemented.
+        this.world = world;
+
+        // Initialise unmade guesses
+        for (int i = 0; i < world.numRow; i++) {
+            for (int j = 0; j < world.numColumn; j++) {
+                Guess g = new Guess();
+                g.row = i;
+                g.column = j;
+                unmadeGuesses.add(g);
+            }
+        }
     } // end of initialisePlayer()
 
     @Override
     public Answer getAnswer(Guess guess) {
-        // To be implemented.
+        Answer answer = new Answer();
 
-        // dummy return
-        return null;
+        // Loop over each ship
+        for (World.ShipLocation sl : world.shipLocations) {
+            // Loop over each coordinate the ship occupies
+            for (World.Coordinate c : sl.coordinates) {
+                // Check if the guess matches the coordinate
+                if (guess.row == c.row && guess.column == c.column) {
+                    answer.isHit = true;
+                    if (isShipSunk(sl)) 
+                    {
+                        answer.shipSunk = sl.ship;
+                        for(int i = 0; i < world.shipLocations.size(); i++)
+                        {
+                            if(world.shipLocations.get(i).ship.name().equals(answer.shipSunk.name()))
+                                world.shipLocations.remove(i);
+                        }
+                    }
+                    return answer;
+                }
+            }
+        }
+
+        return answer;
     } // end of getAnswer()
-
 
     @Override
     public Guess makeGuess() {
-        // To be implemented.
-
-        // dummy return
-        return null;
+        // Generate random number
+        int randIndex = (int)(Math.random() * (unmadeGuesses.size() - 1));
+        // Remove that index from the unmade guesses and return it
+        return unmadeGuesses.remove(randIndex);
     } // end of makeGuess()
 
 
@@ -42,10 +76,28 @@ public class RandomGuessPlayer implements Player{
 
     @Override
     public boolean noRemainingShips() {
-        // To be implemented.
-
-        // dummy return
-        return true;
+        if(world.shipLocations.isEmpty()) return true;
+        return false;
     } // end of noRemainingShips()
+
+    // Check if the ship has been sunk
+    private boolean isShipSunk(World.ShipLocation sl) {
+
+        boolean isHit = false;
+        // Loop over all of the ship's coordinates
+        for (World.Coordinate c : sl.coordinates) {
+            // Check if coordinate has been hit already
+            for(World.Coordinate shot : world.shots)
+            {
+                if (shot.row == c.row && shot.column == c.column) {
+                    isHit = true;
+                    break;
+                }
+            }
+            if(!isHit) return false;
+            isHit = false;
+        }
+        return true;
+    }
 
 } // end of class RandomGuessPlayer
