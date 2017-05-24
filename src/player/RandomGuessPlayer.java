@@ -82,20 +82,9 @@ public class RandomGuessPlayer implements Player{
 
     // Check if the ship has been sunk
     private boolean isShipSunk(World.ShipLocation sl) {
-
-        boolean isHit = false;
         // Loop over all of the ship's coordinates
         for (World.Coordinate c : sl.coordinates) {
-            // Check if coordinate has been hit already
-            for(World.Coordinate shot : world.shots)
-            {
-                if (shot.row == c.row && shot.column == c.column) {
-                    isHit = true;
-                    break;
-                }
-            }
-            if(!isHit) return false;
-            isHit = false;
+            if(!world.shots.contains(c)) return false;
         }
         return true;
     }
