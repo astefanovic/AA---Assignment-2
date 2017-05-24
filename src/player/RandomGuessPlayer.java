@@ -4,7 +4,6 @@ import java.util.Scanner;
 import java.lang.Math;
 import java.util.ArrayList;
 import world.World;
-
 /**
  * Random guess player (task A).
  * Please implement this class.
@@ -43,7 +42,17 @@ public class RandomGuessPlayer implements Player{
                 // Check if the guess matches the coordinate
                 if (guess.row == c.row && guess.column == c.column) {
                     answer.isHit = true;
-                    if (isShipSunk(sl)) answer.shipSunk = sl.ship;
+                    if (isShipSunk(sl)) 
+                    {
+                        answer.shipSunk = sl.ship;
+                        System.out.println("Starting to search ships:")
+                        for(int i = 0; i < world.shipLocations.size(); i++)
+                        {
+                            System.out.println("Searching shipLocations i");
+                            if(world.shipLocations.get(i).ship.name().equals(answer.shipSunk.name()))
+                                world.shipLocations.remove(i);
+                        }
+                    }
                     return answer;
                 }
             }
@@ -69,20 +78,34 @@ public class RandomGuessPlayer implements Player{
 
     @Override
     public boolean noRemainingShips() {
-        // To be implemented.
-
-        // dummy return
-        return true;
+        for(World.ShipLocation sl : world.shipLocations)
+        {
+            System.out.println(sl.ship.name());
+        }
+        if(world.shipLocations.get(0) == null) return true;
+        return false;
     } // end of noRemainingShips()
 
     // Check if the ship has been sunk
     private boolean isShipSunk(World.ShipLocation sl) {
+
+        boolean isHit = false;
         // Loop over all of the ship's coordinates
         for (World.Coordinate c : sl.coordinates) {
             // Check if coordinate has been hit already
+            for(World.Coordinate shot : world.shots)
+            {
+                if (shot.equals(c)) {
+                    isHit = true;
+                    break;
+                }
+            }
+            if(!isHit) return false;
+            /*
             if (!world.shots.contains(c)) {
                 return false;
             }
+            */
         }
         return true;
     }
