@@ -2,6 +2,7 @@ package player;
 
 import java.util.Scanner;
 import world.World;
+import java.util.ArrayList;
 
 /**
  * Greedy guess player (task B).
@@ -11,6 +12,9 @@ import world.World;
  */
 public class GreedyGuessPlayer implements Player{
 
+    private World world;
+    private ArrayList<Guess> unmadeGuesses = new ArrayList<Guess>();
+
     @Override
     public void initialisePlayer(World world) {
         this.world = world;
@@ -18,10 +22,14 @@ public class GreedyGuessPlayer implements Player{
         // Initialise unmade guesses
         for (int i = 0; i < world.numRow; i++) {
             for (int j = 0; j < world.numColumn; j++) {
-                Guess g = new Guess();
-                g.row = i;
-                g.column = j;
-                unmadeGuesses.add(g);
+                // Guesses tiles that arent adjacent (only checks diagonals)
+                if((i%2 == 0 && j%2 == 0) || (i%2 == 1 && j%2 == 1))
+                {
+                    Guess g = new Guess();
+                    g.row = i;
+                    g.column = j;
+                    unmadeGuesses.add(g);
+                }
             }
         }
     }
@@ -57,10 +65,10 @@ public class GreedyGuessPlayer implements Player{
 
     @Override
     public Guess makeGuess() {
-        // To be implemented.
-
-        // dummy return
-        return null;
+        // Generate random number
+        int randIndex = (int)(Math.random() * (unmadeGuesses.size() - 1));
+        // Remove that index from the unmade guesses and return it
+        return unmadeGuesses.remove(randIndex);
     } // end of makeGuess()
 
 
@@ -72,10 +80,17 @@ public class GreedyGuessPlayer implements Player{
 
     @Override
     public boolean noRemainingShips() {
-        // To be implemented.
-
-        // dummy return
-        return true;
+        if(world.shipLocations.isEmpty()) return true;
+        return false;
     } // end of noRemainingShips()
+    
+    // Check if the ship has been sunk
+    private boolean isShipSunk(World.ShipLocation sl) {
+        // Loop over all of the ship's coordinates
+        for (World.Coordinate c : sl.coordinates) {
+            if(!world.shots.contains(c)) return false;
+        }
+        return true;
+    }
 
 } // end of class GreedyGuessPlayer
