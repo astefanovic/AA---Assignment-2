@@ -45,10 +45,8 @@ public class RandomGuessPlayer implements Player{
                     if (isShipSunk(sl)) 
                     {
                         answer.shipSunk = sl.ship;
-                        System.out.println("Starting to search ships:")
                         for(int i = 0; i < world.shipLocations.size(); i++)
                         {
-                            System.out.println("Searching shipLocations i");
                             if(world.shipLocations.get(i).ship.name().equals(answer.shipSunk.name()))
                                 world.shipLocations.remove(i);
                         }
@@ -78,11 +76,7 @@ public class RandomGuessPlayer implements Player{
 
     @Override
     public boolean noRemainingShips() {
-        for(World.ShipLocation sl : world.shipLocations)
-        {
-            System.out.println(sl.ship.name());
-        }
-        if(world.shipLocations.get(0) == null) return true;
+        if(world.shipLocations.isEmpty()) return true;
         return false;
     } // end of noRemainingShips()
 
@@ -95,17 +89,13 @@ public class RandomGuessPlayer implements Player{
             // Check if coordinate has been hit already
             for(World.Coordinate shot : world.shots)
             {
-                if (shot.equals(c)) {
+                if (shot.row == c.row && shot.column == c.column) {
                     isHit = true;
                     break;
                 }
             }
             if(!isHit) return false;
-            /*
-            if (!world.shots.contains(c)) {
-                return false;
-            }
-            */
+            isHit = false;
         }
         return true;
     }
