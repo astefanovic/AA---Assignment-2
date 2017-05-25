@@ -15,6 +15,11 @@ public class RandomGuessPlayer implements Player{
     private World world;
     private ArrayList<Guess> unmadeGuesses = new ArrayList<Guess>();
 
+    /**
+     * @description perform any initialisation operations to start
+     * @param world this player's world instance
+     * @return void
+     **/
     @Override
     public void initialisePlayer(World world) {
         // To be implemented.
@@ -31,6 +36,11 @@ public class RandomGuessPlayer implements Player{
         }
     } // end of initialisePlayer()
 
+    /**
+     * @description Determine whether a ship was hit and also if it was sunk.
+     * @param guess The opponent's guess
+     * @return Answer an object stating whether a hit was made and what ship was sunk (if any)
+     **/
     @Override
     public Answer getAnswer(Guess guess) {
         Answer answer = new Answer();
@@ -42,7 +52,7 @@ public class RandomGuessPlayer implements Player{
                 // Check if the guess matches the coordinate
                 if (guess.row == c.row && guess.column == c.column) {
                     answer.isHit = true;
-                    if (isShipSunk(sl)) 
+                    if (isShipSunk(sl))
                     {
                         answer.shipSunk = sl.ship;
                         for(int i = 0; i < world.shipLocations.size(); i++)
@@ -59,6 +69,10 @@ public class RandomGuessPlayer implements Player{
         return answer;
     } // end of getAnswer()
 
+    /**
+     * @description Make a guess for a location to aim at on opponent's board
+     * @return Guess the location to aim at
+     **/
     @Override
     public Guess makeGuess() {
         // Generate random number
@@ -70,17 +84,25 @@ public class RandomGuessPlayer implements Player{
 
     @Override
     public void update(Guess guess, Answer answer) {
-        // To be implemented.
+        // Nothing to do here.
     } // end of update()
 
 
+    /**
+     * @description Check if there are no remaining ships
+     * @return boolean whether there are no remaining ships
+     **/
     @Override
     public boolean noRemainingShips() {
         if(world.shipLocations.isEmpty()) return true;
         return false;
     } // end of noRemainingShips()
 
-    // Check if the ship has been sunk
+    /**
+     * @description Check if a ship has been sunk
+     * @param World.ShipLocation a ShipLocation object (obtained from the World)
+     * @return boolean whether the ship has been sunk
+     **/
     private boolean isShipSunk(World.ShipLocation sl) {
         // Loop over all of the ship's coordinates
         for (World.Coordinate c : sl.coordinates) {
