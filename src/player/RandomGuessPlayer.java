@@ -106,6 +106,7 @@ public class RandomGuessPlayer implements Player{
     private boolean isShipSunk(World.ShipLocation sl) {
         // Loop over all of the ship's coordinates
         for (World.Coordinate c : sl.coordinates) {
+            // Check if the coordinate exists in the shot array
             if(!world.shots.contains(c)) return false;
         }
         return true;
