@@ -33,7 +33,7 @@ public class World {
             }
 
             return isSame;
-        } 
+        }
     }
 
     // nested class for storing ship locations.
@@ -212,7 +212,9 @@ public class World {
 
         } else {
             if (offset ==0) {
-                StdDraw.setCanvasSize(1800, 900);
+                // NOTE: changed this
+                //StdDraw.setCanvasSize(1800, 900);
+                StdDraw.setCanvasSize(1200, 600);
                 StdDraw.setXscale(-1, 2*(numColumn+1));
                 StdDraw.setYscale(-1, numRow+1);
             }
