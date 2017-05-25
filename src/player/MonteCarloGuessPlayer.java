@@ -16,6 +16,7 @@ public class MonteCarloGuessPlayer  implements Player{
 
     private World world;
     private ArrayList<Guess> unmadeGuesses = new ArrayList<Guess>();
+    private int[][] shipConfigs;
 
     /**
      * @description perform any initialisation operations to start
@@ -25,6 +26,27 @@ public class MonteCarloGuessPlayer  implements Player{
     @Override
     public void initialisePlayer(World world) {
         this.world = world;
+        shipConfigs = new int[world.numRow][world.numColumn];
+
+        // Initialise number of ship configurations for each square
+        for (int i = 0; i < world.numColumn; i++) {
+            for (int j = 0; j < world.numRow; j++) {
+                int totalConfigs = 0;
+                // Calculate possible configurations for each ship
+                for (World.ShipLocation sl : world.shipLocations) {
+
+                    // Calculate configurations in each axis separately
+                    int horizontalConfigs = calcConfigs(world.numRow, j, sl.ship.len());
+                    int verticalCOnfigs = calcConfigs(world.numColumn, i, sl.ship.len());
+
+                    // Calculate total
+                    int configs = horizontalConfigs + verticalCOnfigs;
+                    totalConfigs += configs;
+
+                }
+                shipConfigs[j][i] = totalConfigs;
+            }
+        }
 
         // Initialise unmade guesses
         for (int i = 0; i < world.numRow; i++) {
@@ -109,6 +131,50 @@ public class MonteCarloGuessPlayer  implements Player{
             if(!world.shots.contains(c)) return false;
         }
         return true;
+    }
+
+    /**
+     * @description Calculate the possible configurations of one ship in one axis
+     * @param space the size of the row/column in question
+     * @param position the postion of the ship in the row/column
+     * @param size the size of the ship
+     * @return int the number of configurations
+     **/
+    private int calcConfigs(int space, int position, int size) {
+
+        int longSide;
+        int shortSide;
+        int configs;
+
+        // Calculate room on either side of target square
+        if (position > ((space - 1) / 2)) {
+            longSide = position;
+            shortSide = (space - 1) - position;
+        } else {
+            longSide = (space - 1) - position;
+            shortSide = position;
+        }
+
+        // Calculate number of configs based on size and position in row/column
+        if (space > size) {
+            // If the row/column is longer than the ship, calculate configurations
+            if ((longSide + 1) >= size) {
+                configs = shortSide + 1;
+            } else {
+                configs = shortSide;
+            }
+        } else if (space == size) {
+            // If the row/column is the same size as the ship, there is 1 configuration
+            configs = 1;
+        } else {
+            // If the row/column is shorter than the ship, there are no configurations
+            configs = 0;
+        }
+
+        // Make sure number of configurations isn't greater than the size of ship
+        if (configs > size) configs = size;
+
+        return configs;
     }
 
 } // end of class MonteCarloGuessPlayer
