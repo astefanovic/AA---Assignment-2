@@ -3,7 +3,6 @@ package player;
 import java.util.Scanner;
 import world.World;
 import java.util.ArrayList;
-import java.util.Stack;
 /**
  * Greedy guess player (task B).
  * Please implement this class.
@@ -14,9 +13,8 @@ public class GreedyGuessPlayer implements Player{
 
     private World world;
     private ArrayList<Guess> unmadeGuesses = new ArrayList<Guess>();
-    private boolean targetingMode = false;
-    // Used as a Queue to order the next guesses
-    private Stack<Guess> nextGuess = new Stack<Guess>();
+    // Used as a Queue to order the next guesses, enqueues at the end of the list, dequeues at the start
+    private ArrayList<Guess> nextGuess = new ArrayList<Guess>();
     private ArrayList<Guess> madeGuesses = new ArrayList<Guess>();
 
     @Override
@@ -69,8 +67,8 @@ public class GreedyGuessPlayer implements Player{
 
     @Override
     public Guess makeGuess() {
-        // If the stack is empty, not in targeting mode
-        if(nextGuess.empty())
+        // If the queue is empty, not in targeting mode
+        if(nextGuess.isEmpty())
         {
             // Generate random number
             int randIndex = (int)(Math.random() * (unmadeGuesses.size() - 1));
@@ -81,7 +79,7 @@ public class GreedyGuessPlayer implements Player{
         }
         else
         {
-            Guess g = nextGuess.peek();
+            Guess g = nextGuess.get(0);
             // Adds the guess to the madeGuesses list
             madeGuesses.add(g);
             // Removing the guess made from the unmadeGuesses list
@@ -90,37 +88,37 @@ public class GreedyGuessPlayer implements Player{
                 if(g.row == unmadeGuesses.get(i).row && g.column == unmadeGuesses.get(i).column)
                     unmadeGuesses.remove(i);
             }
-            // Popping off the stack and making that guess
-            return nextGuess.pop();
+            // Dequeuing and making that guess
+            return nextGuess.remove(0);
         }
     } // end of makeGuess()
 
 
     @Override
     public void update(Guess guess, Answer answer) {
-        // If the guess hit, add all the surrounding cells to the stack
+        // If the guess hit, add all the surrounding cells to the queue
         if(answer.isHit) 
         {            
             Guess west = new Guess();
             west.row = guess.row;
             west.column = guess.column - 1;
-            // If the guess is made or out of bounds, dont add to stack
-            if(!inMadeGuesses(west) && west.column >= 0) nextGuess.push(west);
+            // If the guess is made, in queue or out of bounds, dont add to queue
+            if(!inMadeGuesses(west) && !inNextGuess(west) && west.column >= 0) nextGuess.add(west);
             
             Guess south = new Guess();
             south.row = guess.row - 1;
             south.column = guess.column;
-            if(!inMadeGuesses(south) && south.row >= 0) nextGuess.push(south);
+            if(!inMadeGuesses(south) && !inNextGuess(south) && south.row >= 0) nextGuess.add(south);
             
             Guess east = new Guess();
             east.row = guess.row;
             east.column = guess.column + 1;
-            if(!inMadeGuesses(east) && east.column < world.numColumn) nextGuess.push(east);
+            if(!inMadeGuesses(east) && !inNextGuess(east) && east.column < world.numColumn) nextGuess.add(east);
             
             Guess north = new Guess();
             north.row = guess.row + 1;
             north.column = guess.column;
-            if(!inMadeGuesses(north) && north.row < world.numRow) nextGuess.push(north);
+            if(!inMadeGuesses(north) && !inNextGuess(north) && north.row < world.numRow) nextGuess.add(north);
         }
     } // end of update()
 
@@ -153,5 +151,18 @@ public class GreedyGuessPlayer implements Player{
         
         return false;
     }
-
+    
+    //Checks if Guess g is in the arraylist nextGuess
+    private boolean inNextGuess(Guess g)
+    {
+        for(Guess current : nextGuess)
+        {
+            if(g.row == current.row && g.column == current.column)
+            {
+                return true;
+            }
+        }
+        
+        return false;
+    }
 } // end of class GreedyGuessPlayer
