@@ -14,9 +14,14 @@ import world.World;
  */
 public class MonteCarloGuessPlayer  implements Player{
 
+    private enum Mode {
+        HUNT, TARGET
+    }
+
     private World world;
     private ArrayList<Guess> unmadeGuesses = new ArrayList<Guess>();
     private int[][] shipConfigs;
+    private Mode mode = Mode.HUNT;
 
     /**
      * @description perform any initialisation operations to start
@@ -98,16 +103,25 @@ public class MonteCarloGuessPlayer  implements Player{
      **/
     @Override
     public Guess makeGuess() {
-        // To be implemented.
+        Guess guess;
 
+        // Check which mode we are in
+        if (mode == Mode.HUNT) {
+            guess = huntGuess();
+        } else if (mode == Mode.TARGET) {
+            guess = targetGuess();
+        }
+
+        throw new Exception("not finished");
         // dummy return
-        return null;
+        return guess;
     } // end of makeGuess()
 
 
     @Override
     public void update(Guess guess, Answer answer) {
         // To be implemented.
+        throw new Exception("not implemented");
     } // end of update()
 
     /**
@@ -119,6 +133,38 @@ public class MonteCarloGuessPlayer  implements Player{
         if(world.shipLocations.isEmpty()) return true;
         return false;
     } // end of noRemainingShips()
+
+    /* ---------- Private Methods ---------- */
+
+    /**
+     * @description Make guess whilst in hunting mode
+     * @return Guess the guess to be made
+     **/
+    private Guess huntGuess() {
+        // Find cell with highest number of possible configurations
+        int bestGuess = new Guess();
+        int bestCell = shipConfigs[0][0];
+        for (int i = 0; i < world.numColumn; i++) {
+            for (int j = 0; j < world.numRow; j++) {
+                // If this cell is better, update bestGuess and bestCell
+                if (shipConfigs[j][i] > bestCell) {
+                    bestCell = shipConfigs[j][i];
+                    bestGuess.row = j;
+                    bestGuess.column = i;
+                }
+            }
+        }
+        return bestGuess;
+    }
+
+    /**
+     * @description Make guess whilst in targeting mode
+     * @return Guess the guess to be made
+     **/
+    private Guess targetGuess() {
+        throw new Exception("not implemented");
+        return null;
+    }
 
     /**
      * @description Check if a ship has been sunk

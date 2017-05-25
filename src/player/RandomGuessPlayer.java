@@ -43,7 +43,7 @@ public class RandomGuessPlayer implements Player{
                 // Check if the guess matches the coordinate
                 if (guess.row == c.row && guess.column == c.column) {
                     answer.isHit = true;
-                    if (isShipSunk(sl)) 
+                    if (isShipSunk(sl))
                     {
                         answer.shipSunk = sl.ship;
                         for(int i = 0; i < world.shipLocations.size(); i++)
@@ -80,6 +80,8 @@ public class RandomGuessPlayer implements Player{
         if(world.shipLocations.isEmpty()) return true;
         return false;
     } // end of noRemainingShips()
+    
+    /* ---------- Private Methods ---------- */
 
     // Check if the ship has been sunk
     private boolean isShipSunk(World.ShipLocation sl) {
