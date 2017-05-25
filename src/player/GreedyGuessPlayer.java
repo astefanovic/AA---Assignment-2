@@ -3,7 +3,7 @@ package player;
 import java.util.Scanner;
 import world.World;
 import java.util.ArrayList;
-
+import java.util.Stack;
 /**
  * Greedy guess player (task B).
  * Please implement this class.
@@ -16,7 +16,8 @@ public class GreedyGuessPlayer implements Player{
     private ArrayList<Guess> unmadeGuesses = new ArrayList<Guess>();
     private boolean targetingMode = false;
     // Used as a Queue to order the next guesses
-    private ArrayList<Guess> nextGuess = new ArrayList<Guess>();
+    private Stack<Guess> nextGuess = new Stack<Guess>();
+    private ArrayList<Guess> madeGuesses = new ArrayList<Guess>();
 
     @Override
     public void initialisePlayer(World world) {
@@ -68,28 +69,59 @@ public class GreedyGuessPlayer implements Player{
 
     @Override
     public Guess makeGuess() {
-        if(!targetingMode)
+        // If the stack is empty, not in targeting mode
+        if(nextGuess.empty())
         {
             // Generate random number
             int randIndex = (int)(Math.random() * (unmadeGuesses.size() - 1));
+            // Add the guess to the made guesses list
+            madeGuesses.add(unmadeGuesses.get(randIndex));
             // Remove that index from the unmade guesses and return it
             return unmadeGuesses.remove(randIndex);
         }
         else
         {
-            
+            Guess g = nextGuess.peek();
+            // Adds the guess to the madeGuesses list
+            madeGuesses.add(g);
+            // Removing the guess made from the unmadeGuesses list
+            for(int i = 0; i < unmadeGuesses.size(); i++)
+            {
+                if(g.row == unmadeGuesses.get(i).row && g.column == unmadeGuesses.get(i).column)
+                    unmadeGuesses.remove(i);
+            }
+            // Popping off the stack and making that guess
+            return nextGuess.pop();
         }
     } // end of makeGuess()
 
 
     @Override
     public void update(Guess guess, Answer answer) {
+        // If the guess hit, add all the surrounding cells to the stack
         if(answer.isHit) 
-        {
-            targetingMode = true;
-            //queue(new int[])
-        }
+        {            
+            Guess west = new Guess();
+            west.row = guess.row;
+            west.column = guess.column - 1;
+            // If the guess is made or out of bounds, dont add to stack
+            if(!inMadeGuesses(west) && west.column >= 0) nextGuess.push(west);
             
+            Guess south = new Guess();
+            south.row = guess.row - 1;
+            south.column = guess.column;
+            if(!inMadeGuesses(south) && south.row >= 0) nextGuess.push(south);
+            
+            Guess east = new Guess();
+            east.row = guess.row;
+            east.column = guess.column + 1;
+            if(!inMadeGuesses(east) && east.column < world.numColumn) nextGuess.push(east);
+            
+            Guess north = new Guess();
+            north.row = guess.row + 1;
+            north.column = guess.column;
+            if(!inMadeGuesses(north) && north.row < world.numRow) nextGuess.push(north);
+        }
     } // end of update()
 
 
@@ -107,18 +139,19 @@ public class GreedyGuessPlayer implements Player{
         }
         return true;
     }
-        
-    private boolean queue(Guess g)
-    {
-        if(g.row < world.numRow && g.column < world.numRow && g.row >= 0 && g.column >= 0)
-        {
-            nextGuess.add(g);
-        }
-    }
     
-    private Guess dequeue()
+    // Checks if Guess g is in the arraylist madeGuesses
+    private boolean inMadeGuesses(Guess g)
     {
-        return nextGuess.remove(nextGuess.size() - 1);
+        for(Guess current : madeGuesses)
+        {
+            if(g.row == current.row && g.column == current.column)
+            {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
 } // end of class GreedyGuessPlayer
