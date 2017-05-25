@@ -15,6 +15,8 @@ public class GreedyGuessPlayer implements Player{
     private World world;
     private ArrayList<Guess> unmadeGuesses = new ArrayList<Guess>();
     private boolean targetingMode = false;
+    // Used as a Queue to order the next guesses
+    private ArrayList<Guess> nextGuess = new ArrayList<Guess>();
 
     @Override
     public void initialisePlayer(World world) {
@@ -82,7 +84,12 @@ public class GreedyGuessPlayer implements Player{
 
     @Override
     public void update(Guess guess, Answer answer) {
-        if(answer.isHit) targetingMode = true
+        if(answer.isHit) 
+        {
+            targetingMode = true;
+            //queue(new int[])
+        }
+            
     } // end of update()
 
 
@@ -99,6 +106,19 @@ public class GreedyGuessPlayer implements Player{
             if(!world.shots.contains(c)) return false;
         }
         return true;
+    }
+        
+    private boolean queue(Guess g)
+    {
+        if(g.row < world.numRow && g.column < world.numRow && g.row >= 0 && g.column >= 0)
+        {
+            nextGuess.add(g);
+        }
+    }
+    
+    private Guess dequeue()
+    {
+        return nextGuess.remove(nextGuess.size() - 1);
     }
 
 } // end of class GreedyGuessPlayer
