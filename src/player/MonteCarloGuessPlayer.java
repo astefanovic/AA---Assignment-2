@@ -3,6 +3,7 @@ package player;
 import java.util.Scanner;
 import java.lang.Math;
 import java.util.ArrayList;
+import java.util.Stack;
 
 import world.World;
 
@@ -22,6 +23,7 @@ public class MonteCarloGuessPlayer  implements Player{
     private ArrayList<Guess> unmadeGuesses = new ArrayList<Guess>();
     private int[][] shipConfigs;
     private Mode mode = Mode.HUNT;
+    private Stack targetingStack = new Stack();
 
     /**
      * @description perform any initialisation operations to start
@@ -33,25 +35,7 @@ public class MonteCarloGuessPlayer  implements Player{
         this.world = world;
         shipConfigs = new int[world.numRow][world.numColumn];
 
-        // Initialise number of ship configurations for each square
-        for (int i = 0; i < world.numColumn; i++) {
-            for (int j = 0; j < world.numRow; j++) {
-                int totalConfigs = 0;
-                // Calculate possible configurations for each ship
-                for (World.ShipLocation sl : world.shipLocations) {
-
-                    // Calculate configurations in each axis separately
-                    int horizontalConfigs = calcConfigs(world.numRow, j, sl.ship.len());
-                    int verticalCOnfigs = calcConfigs(world.numColumn, i, sl.ship.len());
-
-                    // Calculate total
-                    int configs = horizontalConfigs + verticalCOnfigs;
-                    totalConfigs += configs;
-
-                }
-                shipConfigs[j][i] = totalConfigs;
-            }
-        }
+        calcShipConfigs();
 
         // Initialise unmade guesses
         for (int i = 0; i < world.numRow; i++) {
@@ -120,7 +104,31 @@ public class MonteCarloGuessPlayer  implements Player{
 
     @Override
     public void update(Guess guess, Answer answer) {
-        // To be implemented.
+        // Update mode
+        if (answer.isHit || !targetingStack.empty()) {
+            mode = Mode.TARGET;
+        } else {
+            mode = Mode.HUNT;
+            return;
+        }
+
+        // NOTE: can't just use calcShipConfigs below...
+        // must adjust it to account for previous shots!!!!!!!!!!!!!!!!
+
+        if (answer.shipSunk != null) {
+            calcShipConfigs();
+            // Calculate best guesses and push items onto stack
+        } else if (answer.isHit) {
+            // Modify ship config counts
+            // Calculate best guesses and push items onto stack
+        } else {
+            shipConfigs[guess.row][guess.column] = -1;
+            // Modify ship config counts
+            // Calculate best guesses and push items onto stack
+        }
+
+        updateShipConfigurations(guess, answer);
+
         throw new Exception("not implemented");
     } // end of update()
 
@@ -180,13 +188,39 @@ public class MonteCarloGuessPlayer  implements Player{
     }
 
     /**
+     * @description Calculate all possible ship configuration counts
+     * @return void
+     **/
+    private void calcShipConfigs() {
+        // Initialise number of ship configurations for each square
+        for (int i = 0; i < world.numColumn; i++) {
+            for (int j = 0; j < world.numRow; j++) {
+                int totalConfigs = 0;
+                // Calculate possible configurations for each ship
+                for (World.ShipLocation sl : world.shipLocations) {
+
+                    // Calculate configurations in each axis separately
+                    int horizontalConfigs = calc1DShipConfig(world.numRow, j, sl.ship.len());
+                    int verticalCOnfigs = calc1DShipConfig(world.numColumn, i, sl.ship.len());
+
+                    // Calculate total
+                    int configs = horizontalConfigs + verticalCOnfigs;
+                    totalConfigs += configs;
+
+                }
+                shipConfigs[j][i] = totalConfigs;
+            }
+        }
+    }
+
+    /**
      * @description Calculate the possible configurations of one ship in one axis
      * @param space the size of the row/column in question
      * @param position the postion of the ship in the row/column
      * @param size the size of the ship
      * @return int the number of configurations
      **/
-    private int calcConfigs(int space, int position, int size) {
+    private int calc1DShipConfig(int space, int position, int size) {
 
         int longSide;
         int shortSide;
