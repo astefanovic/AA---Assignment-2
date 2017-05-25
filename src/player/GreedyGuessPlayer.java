@@ -14,6 +14,7 @@ public class GreedyGuessPlayer implements Player{
 
     private World world;
     private ArrayList<Guess> unmadeGuesses = new ArrayList<Guess>();
+    private boolean targetingMode = false;
 
     @Override
     public void initialisePlayer(World world) {
@@ -65,16 +66,23 @@ public class GreedyGuessPlayer implements Player{
 
     @Override
     public Guess makeGuess() {
-        // Generate random number
-        int randIndex = (int)(Math.random() * (unmadeGuesses.size() - 1));
-        // Remove that index from the unmade guesses and return it
-        return unmadeGuesses.remove(randIndex);
+        if(!targetingMode)
+        {
+            // Generate random number
+            int randIndex = (int)(Math.random() * (unmadeGuesses.size() - 1));
+            // Remove that index from the unmade guesses and return it
+            return unmadeGuesses.remove(randIndex);
+        }
+        else
+        {
+            
+        }
     } // end of makeGuess()
 
 
     @Override
     public void update(Guess guess, Answer answer) {
-        // To be implemented.
+        if(answer.isHit) targetingMode = true
     } // end of update()
 
 
@@ -83,7 +91,7 @@ public class GreedyGuessPlayer implements Player{
         if(world.shipLocations.isEmpty()) return true;
         return false;
     } // end of noRemainingShips()
-    
+
     // Check if the ship has been sunk
     private boolean isShipSunk(World.ShipLocation sl) {
         // Loop over all of the ship's coordinates
