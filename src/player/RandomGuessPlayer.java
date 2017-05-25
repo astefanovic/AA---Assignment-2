@@ -3,7 +3,9 @@ package player;
 import java.util.Scanner;
 import java.lang.Math;
 import java.util.ArrayList;
+
 import world.World;
+
 /**
  * Random guess player (task A).
  * Please implement this class.
@@ -17,7 +19,6 @@ public class RandomGuessPlayer implements Player{
 
     @Override
     public void initialisePlayer(World world) {
-        // To be implemented.
         this.world = world;
 
         // Initialise unmade guesses
