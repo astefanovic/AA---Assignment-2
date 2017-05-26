@@ -140,7 +140,8 @@ public class MonteCarloGuessPlayer  implements Player{
             // Modify ship config counts
             // Calculate best guesses and push items onto stack
         } else {
-            shipConfigs[guess.row][guess.column] = -1;
+            // I dont think we need this, it does this automatically now when calcShipConfigs() runs
+            //shipConfigs[guess.row][guess.column] = -1;
             // Modify ship config counts
             // Calculate best guesses and push items onto stack
         }
