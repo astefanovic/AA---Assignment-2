@@ -4,7 +4,7 @@ import java.util.Scanner;
 import java.lang.Math;
 import java.util.ArrayList;
 import java.util.Stack;
-
+import ship.*;
 import world.World;
 
 /**
@@ -26,6 +26,8 @@ public class MonteCarloGuessPlayer  implements Player{
     private ArrayList<Ship> enemyShips = new ArrayList<Ship>();
     private int[][] shipConfigs;
     private Mode mode = Mode.HUNT;
+    // Used as a Queue to order the next guesses, enqueues at the end of the list, dequeues at the start
+    private ArrayList<Guess> nextGuess = new ArrayList<Guess>();
     private Stack targetingStack = new Stack();
 
     /**
@@ -38,6 +40,12 @@ public class MonteCarloGuessPlayer  implements Player{
         this.world = world;
         shipConfigs = new int[world.numRow][world.numColumn];
 
+        // Initialise the other players ships
+        for(World.ShipLocation sl : world.shipLocations)
+        {
+            enemyShips.add(sl.ship);
+        }
+        
         calcShipConfigs();
 
         // Initialise unmade guesses
@@ -49,12 +57,8 @@ public class MonteCarloGuessPlayer  implements Player{
                 unmadeGuesses.add(g);
             }
         }
+
         
-        // Initialise the other players ships
-        for(World.ShipLocation sl : world.shipLocations)
-        {
-            enemyShips.add(sl.ship);
-        }
     } // end of initialisePlayer()
 
     /**
@@ -96,7 +100,7 @@ public class MonteCarloGuessPlayer  implements Player{
      **/
     @Override
     public Guess makeGuess() {
-        Guess guess;
+        Guess guess = null;
 
         // Check which mode we are in
         if (mode == Mode.HUNT) {
@@ -105,7 +109,7 @@ public class MonteCarloGuessPlayer  implements Player{
             guess = targetGuess();
         }
 
-        throw new Exception("not finished");
+        //throw new Exception("not finished");
         // dummy return
         return guess;
     } // end of makeGuess()
@@ -114,41 +118,66 @@ public class MonteCarloGuessPlayer  implements Player{
     @Override
     public void update(Guess guess, Answer answer) {
         // Update mode
-        if (answer.isHit || !targetingStack.empty()) {
+        if (answer.isHit || !nextGuess.isEmpty()) {
             mode = Mode.TARGET;
         } else {
             mode = Mode.HUNT;
             return;
         }
-
+        
         // NOTE: can't just use calcShipConfigs below...
         // must adjust it to account for previous shots!!!!!!!!!!!!!!!!
 
         if (answer.shipSunk != null) {
             // Updating enemyShips
-            for(Ship s : enemyShips)
+            int index = 0;
+            for(; index < enemyShips.size(); index++)
             {
-                if(answer.shipSunk.name().equals(s.name()))
+                if(answer.shipSunk.name().equals(enemyShips.get(index).name()))
                 {
-                    enemyShips.remove(s);
+                    break;
                 }
             }
-            
+            enemyShips.remove(index);
+
             calcShipConfigs();
             // Calculate best guesses and push items onto stack
         } else if (answer.isHit) {
+            Guess west = new Guess();
+            west.row = guess.row;
+            west.column = guess.column - 1;
+            // If the guess is made, in queue or out of bounds, dont add to queue
+            if(!inMadeGuesses(west) && !inNextGuess(west) && west.column >= 0) nextGuess.add(west);
+
+            Guess south = new Guess();
+            south.row = guess.row - 1;
+            south.column = guess.column;
+            if(!inMadeGuesses(south) && !inNextGuess(south) && south.row >= 0) nextGuess.add(south);
+
+            Guess east = new Guess();
+            east.row = guess.row;
+            east.column = guess.column + 1;
+            if(!inMadeGuesses(east) && !inNextGuess(east) && east.column < world.numColumn) nextGuess.add(east);
+
+            Guess north = new Guess();
+            north.row = guess.row + 1;
+            north.column = guess.column;
+            if(!inMadeGuesses(north) && !inNextGuess(north) && north.row < world.numRow) nextGuess.add(north);
             // Modify ship config counts
             // Calculate best guesses and push items onto stack
+            calcShipConfigs();
         } else {
+            calcShipConfigs();
             // I dont think we need this, it does this automatically now when calcShipConfigs() runs
             //shipConfigs[guess.row][guess.column] = -1;
+
             // Modify ship config counts
             // Calculate best guesses and push items onto stack
         }
 
-        updateShipConfigurations(guess, answer);
+        //updateShipConfigurations(guess, answer);
 
-        throw new Exception("not implemented");
+        //throw new Exception("not implemented");
     } // end of update()
 
     /**
@@ -169,18 +198,20 @@ public class MonteCarloGuessPlayer  implements Player{
      **/
     private Guess huntGuess() {
         // Find cell with highest number of possible configurations
-        int bestGuess = new Guess();
+        Guess bestGuess = new Guess();
         int bestCell = shipConfigs[0][0];
         for (int i = 0; i < world.numColumn; i++) {
             for (int j = 0; j < world.numRow; j++) {
+                System.out.print(shipConfigs[i][j]);
                 // If this cell is better, update bestGuess and bestCell
-                if (shipConfigs[j][i] > bestCell) {
-                    bestCell = shipConfigs[j][i];
-                    bestGuess.row = j;
-                    bestGuess.column = i;
+                if (shipConfigs[i][j] > bestCell) {
+                    bestCell = shipConfigs[i][j];
+                    bestGuess.row = i;
+                    bestGuess.column = j;
                 }
             }
         }
+        System.out.println(bestGuess);
         madeGuesses.add(bestGuess);
         return bestGuess;
     }
@@ -190,8 +221,18 @@ public class MonteCarloGuessPlayer  implements Player{
      * @return Guess the guess to be made
      **/
     private Guess targetGuess() {
-        throw new Exception("not implemented");
-        return null;
+        // From Part B
+        Guess g = nextGuess.get(0);
+        // Adds the guess to the madeGuesses list
+        madeGuesses.add(g);
+        // Removing the guess made from the unmadeGuesses list
+        for(int i = 0; i < unmadeGuesses.size(); i++)
+        {
+            if(g.row == unmadeGuesses.get(i).row && g.column == unmadeGuesses.get(i).column)
+                unmadeGuesses.remove(i);
+        }
+        // Dequeuing and making that guess
+        return nextGuess.remove(0);
     }
 
     /**
@@ -219,10 +260,11 @@ public class MonteCarloGuessPlayer  implements Player{
                 // Calculate possible configurations for each ship
                 for (Ship s : enemyShips) {
 
+                    //System.out.print(s.toString());
                     // Calculate configurations in each axis separately
                     // Scans the current row for any hit cells
-                    int horizontalEndingIndex;
-                    int horizontalStartingIndex;
+                    int horizontalEndingIndex = 0;
+                    int horizontalStartingIndex = 0;
                     // Scanning to the right of the current cell
                     for(int k = j; k < world.numColumn; k++)
                     {
@@ -241,16 +283,17 @@ public class MonteCarloGuessPlayer  implements Player{
                         g.column = k;
                         if(inMadeGuesses(g)) break;
                     }
-                    
+
                     int horizontalConfigs = calc1DShipConfig(horizontalStartingIndex, horizontalEndingIndex, j, s.len());
-                    
+                    System.out.println("Horizontal : " + s.name() + horizontalConfigs);
+
                     // Scans the current column for any hit cells
-                    int verticalEndingIndex;
-                    int verticalStartingIndex;
+                    int verticalEndingIndex = 0;
+                    int verticalStartingIndex = 0;
                     // Scanning above the current cell
                     for(int k = i; k < world.numRow; k++)
                     {
-                        horizontalEndingIndex = k;
+                        verticalEndingIndex = k;
                         Guess g = new Guess();
                         g.row = k;
                         g.column = j;
@@ -259,21 +302,22 @@ public class MonteCarloGuessPlayer  implements Player{
                     // Scanning below the current cell
                     for(int k = i; k >= 0; k--)
                     {
-                        horizontalStartingIndex = k;
+                        verticalStartingIndex = k;
                         Guess g = new Guess();
                         g.row = k;
                         g.column = j;
                         if(inMadeGuesses(g)) break;
                     }
-                    
+
                     int verticalConfigs = calc1DShipConfig(verticalStartingIndex, verticalEndingIndex, i, s.len());
+                    System.out.println("Vertical: " + s.name() + verticalConfigs);
 
                     // Calculate total
                     int configs = horizontalConfigs + verticalConfigs;
                     totalConfigs += configs;
 
                 }
-                shipConfigs[j][i] = totalConfigs;
+                shipConfigs[i][j] = totalConfigs;
             }
         }
     }
@@ -324,11 +368,25 @@ public class MonteCarloGuessPlayer  implements Player{
 
         return configs;
     }
-    
+
     // Checks if Guess g is in the arraylist madeGuesses
     private boolean inMadeGuesses(Guess g)
     {
         for(Guess current : madeGuesses)
+        {
+            if(g.row == current.row && g.column == current.column)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    
+    //Checks if Guess g is in the arraylist nextGuess
+    private boolean inNextGuess(Guess g)
+    {
+        for(Guess current : nextGuess)
         {
             if(g.row == current.row && g.column == current.column)
             {
