@@ -123,7 +123,6 @@ public class MonteCarloGuessPlayer  implements Player{
             mode = Mode.TARGET;
         } else {
             mode = Mode.HUNT;
-            return;
         }
 
         // NOTE: can't just use calcShipConfigs below...
@@ -143,7 +142,9 @@ public class MonteCarloGuessPlayer  implements Player{
 
             calcShipConfigs();
             // Calculate best guesses and push items onto stack
-        } else if (answer.isHit) {
+        }
+        
+        if (answer.isHit) {
             Guess west = new Guess();
             west.row = guess.row;
             west.column = guess.column - 1;
@@ -233,6 +234,7 @@ public class MonteCarloGuessPlayer  implements Player{
             if(g.row == unmadeGuesses.get(i).row && g.column == unmadeGuesses.get(i).column)
                 unmadeGuesses.remove(i);
         }
+        System.out.println(Arrays.deepToString(shipConfigs));
         // Dequeuing and making that guess
         return nextGuess.remove(0);
     }
