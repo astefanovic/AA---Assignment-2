@@ -17,6 +17,11 @@ public class GreedyGuessPlayer implements Player{
     private ArrayList<Guess> nextGuess = new ArrayList<Guess>();
     private ArrayList<Guess> madeGuesses = new ArrayList<Guess>();
 
+    /**
+     * @description perform any initialisation operations to start
+     * @param world this player's world instance
+     * @return void
+     **/
     @Override
     public void initialisePlayer(World world) {
         this.world = world;
@@ -36,10 +41,14 @@ public class GreedyGuessPlayer implements Player{
         }
     }
 
+    /**
+     * @description Determine whether a ship was hit and also if it was sunk.
+     * @param guess The opponent's guess
+     * @return Answer an object stating whether a hit was made and what ship was sunk (if any)
+     **/
     @Override
     public Answer getAnswer(Guess guess) {
         Answer answer = new Answer();
-
         // Loop over each ship
         for (World.ShipLocation sl : world.shipLocations) {
             // Loop over each coordinate the ship occupies
@@ -47,6 +56,7 @@ public class GreedyGuessPlayer implements Player{
                 // Check if the guess matches the coordinate
                 if (guess.row == c.row && guess.column == c.column) {
                     answer.isHit = true;
+                    // If the ship is sunk, remove it from shipLocations
                     if (isShipSunk(sl))
                     {
                         answer.shipSunk = sl.ship;
@@ -65,6 +75,10 @@ public class GreedyGuessPlayer implements Player{
     } // end of getAnswer()
 
 
+    /**
+     * @description Make a guess for a location to aim at on opponent's board
+     * @return Guess the location to aim at
+     **/
     @Override
     public Guess makeGuess() {
         // If the queue is empty, not in targeting mode
@@ -94,6 +108,12 @@ public class GreedyGuessPlayer implements Player{
     } // end of makeGuess()
 
 
+    /**
+     * @description Make a guess for a location to aim at on opponent's board
+     * @param guess the guess player just made
+     * @param answer the answer returned by the opponent
+     * @return void
+     **/
     @Override
     public void update(Guess guess, Answer answer) {
         // If the guess hit, add all the surrounding cells to the queue
@@ -104,17 +124,17 @@ public class GreedyGuessPlayer implements Player{
             west.column = guess.column - 1;
             // If the guess is made, in queue or out of bounds, dont add to queue
             if(!inMadeGuesses(west) && !inNextGuess(west) && west.column >= 0) nextGuess.add(west);
-            
+
             Guess south = new Guess();
             south.row = guess.row - 1;
             south.column = guess.column;
             if(!inMadeGuesses(south) && !inNextGuess(south) && south.row >= 0) nextGuess.add(south);
-            
+
             Guess east = new Guess();
             east.row = guess.row;
             east.column = guess.column + 1;
             if(!inMadeGuesses(east) && !inNextGuess(east) && east.column < world.numColumn) nextGuess.add(east);
-            
+
             Guess north = new Guess();
             north.row = guess.row + 1;
             north.column = guess.column;
@@ -123,13 +143,21 @@ public class GreedyGuessPlayer implements Player{
     } // end of update()
 
 
+    /**
+     * @description Check if there are no remaining ships on the board
+     * @return boolean whether there are no remaining ships
+     **/
     @Override
     public boolean noRemainingShips() {
         if(world.shipLocations.isEmpty()) return true;
         return false;
     } // end of noRemainingShips()
 
-    // Check if the ship has been sunk
+    /**
+     * @description Check if a ship has been sunk
+     * @param World.ShipLocation a ShipLocation object (obtained from the World)
+     * @return boolean whether the ship has been sunk
+     **/
     private boolean isShipSunk(World.ShipLocation sl) {
         // Loop over all of the ship's coordinates
         for (World.Coordinate c : sl.coordinates) {
@@ -137,8 +165,11 @@ public class GreedyGuessPlayer implements Player{
         }
         return true;
     }
-    
-    // Checks if Guess g is in the arraylist madeGuesses
+
+    /**
+     * @description Checks if Guess g is in the arraylist madeGuesses
+     * @return boolean if the guess has already been made
+     **/
     private boolean inMadeGuesses(Guess g)
     {
         for(Guess current : madeGuesses)
@@ -148,11 +179,14 @@ public class GreedyGuessPlayer implements Player{
                 return true;
             }
         }
-        
+
         return false;
     }
-    
-    //Checks if Guess g is in the arraylist nextGuess
+
+    /**
+     * @description Checks if Guess g is in the arraylist nextGuess
+     * @return boolean if the guess is in inNextGuess
+     **/
     private boolean inNextGuess(Guess g)
     {
         for(Guess current : nextGuess)
@@ -162,7 +196,7 @@ public class GreedyGuessPlayer implements Player{
                 return true;
             }
         }
-        
+
         return false;
     }
 } // end of class GreedyGuessPlayer

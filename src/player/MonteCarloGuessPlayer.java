@@ -121,7 +121,7 @@ public class MonteCarloGuessPlayer  implements Player{
 
         // If the ship is sunk remove it from enemyShips and recalculate configs
         if (answer.shipSunk != null) {
-            
+
             // Updating enemyShips
             for(int index = 0; index < enemyShips.size(); index++)
             {
@@ -132,7 +132,7 @@ public class MonteCarloGuessPlayer  implements Player{
                 }
             }
         }
-        
+
         // If the guess hit, add to adjacent cells to targeting queue
         if (answer.isHit) {
             Guess west = new Guess();
@@ -358,7 +358,7 @@ public class MonteCarloGuessPlayer  implements Player{
 
         return false;
     }
-    
+
     /**
      * @description Checks if Guess g is in the arraylist nextGuess
      * @return boolean if the guess is in inNextGuess
