@@ -4,6 +4,7 @@ import java.util.Scanner;
 import java.lang.Math;
 import java.util.ArrayList;
 import java.util.Stack;
+import java.util.Arrays;
 import ship.*;
 import world.World;
 
@@ -175,6 +176,7 @@ public class MonteCarloGuessPlayer  implements Player{
             // Calculate best guesses and push items onto stack
         }
 
+        calcShipConfigs();
         //updateShipConfigurations(guess, answer);
 
         //throw new Exception("not implemented");
@@ -331,18 +333,18 @@ public class MonteCarloGuessPlayer  implements Player{
     private int calc1DShipConfig(int startingIndex, int endingIndex, int position, int size) {
 
         int space = endingIndex - startingIndex;
-        position = position - startingIndex;
+        int recalibratedPosition = position - startingIndex;
         int longSide;
         int shortSide;
         int configs;
 
         // Calculate room on either side of target square
-        if (position > ((space - 1) / 2)) {
-            longSide = position;
-            shortSide = (space - 1) - position;
+        if (recalibratedPosition > (space / 2)) {
+            longSide = recalibratedPosition;
+            shortSide = space - recalibratedPosition;
         } else {
-            longSide = (space - 1) - position;
-            shortSide = position;
+            longSide = space - recalibratedPosition;
+            shortSide = recalibratedPosition;
         }
 
         // Calculate number of configs based on size and position in row/column
