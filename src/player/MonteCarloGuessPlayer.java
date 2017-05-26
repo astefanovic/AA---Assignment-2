@@ -20,7 +20,10 @@ public class MonteCarloGuessPlayer  implements Player{
     }
 
     private World world;
+    // Do we need this?
     private ArrayList<Guess> unmadeGuesses = new ArrayList<Guess>();
+    private ArrayList<Guess> madeGuesses = new ArrayList<Guess>();
+    private ArrayList<Ship> enemyShips = new ArrayList<Ship>();
     private int[][] shipConfigs;
     private Mode mode = Mode.HUNT;
     private Stack targetingStack = new Stack();
@@ -45,6 +48,12 @@ public class MonteCarloGuessPlayer  implements Player{
                 g.column = j;
                 unmadeGuesses.add(g);
             }
+        }
+        
+        // Initialise the other players ships
+        for(World.ShipLocation sl : world.shipLocations)
+        {
+            enemyShips.add(sl.ship);
         }
     } // end of initialisePlayer()
 
@@ -116,6 +125,15 @@ public class MonteCarloGuessPlayer  implements Player{
         // must adjust it to account for previous shots!!!!!!!!!!!!!!!!
 
         if (answer.shipSunk != null) {
+            // Updating enemyShips
+            for(Ship s : enemyShips)
+            {
+                if(answer.shipSunk.name().equals(s.name()))
+                {
+                    enemyShips.remove(s);
+                }
+            }
+            
             calcShipConfigs();
             // Calculate best guesses and push items onto stack
         } else if (answer.isHit) {
@@ -162,6 +180,7 @@ public class MonteCarloGuessPlayer  implements Player{
                 }
             }
         }
+        madeGuesses.add(bestGuess);
         return bestGuess;
     }
 
@@ -197,14 +216,59 @@ public class MonteCarloGuessPlayer  implements Player{
             for (int j = 0; j < world.numRow; j++) {
                 int totalConfigs = 0;
                 // Calculate possible configurations for each ship
-                for (World.ShipLocation sl : world.shipLocations) {
+                for (Ship s : enemyShips) {
 
                     // Calculate configurations in each axis separately
-                    int horizontalConfigs = calc1DShipConfig(world.numRow, j, sl.ship.len());
-                    int verticalCOnfigs = calc1DShipConfig(world.numColumn, i, sl.ship.len());
+                    // Scans the current row for any hit cells
+                    int horizontalEndingIndex;
+                    int horizontalStartingIndex;
+                    // Scanning to the right of the current cell
+                    for(int k = j; k < world.numColumn; k++)
+                    {
+                        horizontalEndingIndex = k;
+                        Guess g = new Guess();
+                        g.row = i;
+                        g.column = k;
+                        if(inMadeGuesses(g)) break;
+                    }
+                    // Scanning to the left of the current cell
+                    for(int k = j; k >= 0; k--)
+                    {
+                        horizontalStartingIndex = k;
+                        Guess g = new Guess();
+                        g.row = i;
+                        g.column = k;
+                        if(inMadeGuesses(g)) break;
+                    }
+                    
+                    int horizontalConfigs = calc1DShipConfig(horizontalStartingIndex, horizontalEndingIndex, j, s.len());
+                    
+                    // Scans the current column for any hit cells
+                    int verticalEndingIndex;
+                    int verticalStartingIndex;
+                    // Scanning above the current cell
+                    for(int k = i; k < world.numRow; k++)
+                    {
+                        horizontalEndingIndex = k;
+                        Guess g = new Guess();
+                        g.row = k;
+                        g.column = j;
+                        if(inMadeGuesses(g)) break;
+                    }
+                    // Scanning below the current cell
+                    for(int k = i; k >= 0; k--)
+                    {
+                        horizontalStartingIndex = k;
+                        Guess g = new Guess();
+                        g.row = k;
+                        g.column = j;
+                        if(inMadeGuesses(g)) break;
+                    }
+                    
+                    int verticalConfigs = calc1DShipConfig(verticalStartingIndex, verticalEndingIndex, i, s.len());
 
                     // Calculate total
-                    int configs = horizontalConfigs + verticalCOnfigs;
+                    int configs = horizontalConfigs + verticalConfigs;
                     totalConfigs += configs;
 
                 }
@@ -215,13 +279,16 @@ public class MonteCarloGuessPlayer  implements Player{
 
     /**
      * @description Calculate the possible configurations of one ship in one axis
-     * @param space the size of the row/column in question
+     * @param startingIndex space between the ship position and the next hit or end of row
+     * @param endingIndex space between the ship position and the next hit or end of row
      * @param position the postion of the ship in the row/column
      * @param size the size of the ship
      * @return int the number of configurations
      **/
-    private int calc1DShipConfig(int space, int position, int size) {
+    private int calc1DShipConfig(int startingIndex, int endingIndex, int position, int size) {
 
+        int space = endingIndex - startingIndex;
+        position = position - startingIndex;
         int longSide;
         int shortSide;
         int configs;
@@ -255,6 +322,20 @@ public class MonteCarloGuessPlayer  implements Player{
         if (configs > size) configs = size;
 
         return configs;
+    }
+    
+    // Checks if Guess g is in the arraylist madeGuesses
+    private boolean inMadeGuesses(Guess g)
+    {
+        for(Guess current : madeGuesses)
+        {
+            if(g.row == current.row && g.column == current.column)
+            {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
 } // end of class MonteCarloGuessPlayer
