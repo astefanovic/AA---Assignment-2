@@ -45,7 +45,7 @@ public class MonteCarloGuessPlayer  implements Player{
         {
             enemyShips.add(sl.ship);
         }
-        
+
         calcShipConfigs();
 
         // Initialise unmade guesses
@@ -58,7 +58,7 @@ public class MonteCarloGuessPlayer  implements Player{
             }
         }
 
-        
+
     } // end of initialisePlayer()
 
     /**
@@ -124,7 +124,7 @@ public class MonteCarloGuessPlayer  implements Player{
             mode = Mode.HUNT;
             return;
         }
-        
+
         // NOTE: can't just use calcShipConfigs below...
         // must adjust it to account for previous shots!!!!!!!!!!!!!!!!
 
@@ -202,7 +202,6 @@ public class MonteCarloGuessPlayer  implements Player{
         int bestCell = shipConfigs[0][0];
         for (int i = 0; i < world.numColumn; i++) {
             for (int j = 0; j < world.numRow; j++) {
-                System.out.print(shipConfigs[i][j]);
                 // If this cell is better, update bestGuess and bestCell
                 if (shipConfigs[i][j] > bestCell) {
                     bestCell = shipConfigs[i][j];
@@ -211,6 +210,7 @@ public class MonteCarloGuessPlayer  implements Player{
                 }
             }
         }
+        System.out.println(Arrays.deepToString(shipConfigs));
         System.out.println(bestGuess);
         madeGuesses.add(bestGuess);
         return bestGuess;
@@ -285,7 +285,6 @@ public class MonteCarloGuessPlayer  implements Player{
                     }
 
                     int horizontalConfigs = calc1DShipConfig(horizontalStartingIndex, horizontalEndingIndex, j, s.len());
-                    System.out.println("Horizontal : " + s.name() + horizontalConfigs);
 
                     // Scans the current column for any hit cells
                     int verticalEndingIndex = 0;
@@ -310,7 +309,6 @@ public class MonteCarloGuessPlayer  implements Player{
                     }
 
                     int verticalConfigs = calc1DShipConfig(verticalStartingIndex, verticalEndingIndex, i, s.len());
-                    System.out.println("Vertical: " + s.name() + verticalConfigs);
 
                     // Calculate total
                     int configs = horizontalConfigs + verticalConfigs;
@@ -382,7 +380,7 @@ public class MonteCarloGuessPlayer  implements Player{
 
         return false;
     }
-    
+
     //Checks if Guess g is in the arraylist nextGuess
     private boolean inNextGuess(Guess g)
     {
@@ -393,7 +391,7 @@ public class MonteCarloGuessPlayer  implements Player{
                 return true;
             }
         }
-        
+
         return false;
     }
 
